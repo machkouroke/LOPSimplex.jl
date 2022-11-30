@@ -135,7 +135,7 @@ function simplex_case(A::Matrix{Float64}, b::Vector{Float64}, c::Vector{Float64}
     end
 end
 
-function main()
+function test()
     A = Float64[10 5
         2 3
         1 0
@@ -148,5 +148,3 @@ function main()
     foreach(x -> display(x["Simplex array"]), values(answer[5]))
     return 0
 end
-
-main()
