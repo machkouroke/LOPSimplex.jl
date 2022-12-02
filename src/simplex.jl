@@ -107,6 +107,9 @@ Permet de détecter quelle algorithme du simplex appliquer en fonction du systè
 """
 function simplex_case(A, b, c;
     inequality=["<=" for i in 1:size(A)[1]], type="max_base", verbose=false)
+    A = convert(Matrix{Float64}, A)
+    b = convert(Vector{Float64}, b)
+    c = convert(Vector{Float64}, c)
     @match type begin
         "max_base" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, -c)
