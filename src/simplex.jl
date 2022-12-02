@@ -105,7 +105,7 @@ Permet de détecter quelle algorithme du simplex appliquer en fonction du systè
 - `inequality::Vector{String}`: Vecteur des inégalités du système de contraintes
 - `type::String`: Type de problème à résoudre soit une maximisation ou une minimisation
 """
-function simplex_case(A::Matrix{Float64}, b::Vector{Float64}, c::Vector{Float64};
+function simplex_case(A, b, c;
     inequality=["<=" for i in 1:size(A)[1]], type="max_base", verbose=false)
     @match type begin
         "max_base" => begin
