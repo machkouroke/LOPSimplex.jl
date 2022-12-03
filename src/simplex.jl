@@ -9,22 +9,22 @@ dual les solutions sont des variables d'écart
 Pour le problème dual, toutes les variable sont envoyé
 - `primal::Bool`: Si `true` alors le problème est primal, sinon le problème est dual
 """
-function detect_solution(simplex_array::Matrix{Float64}, solution_set::Vector{String}; primal = true)
-	variables = Dict()
-	if primal
-		for (index, variable) in enumerate(solution_set)
-			if split(variable, "_")[1] == "x"
-				variables[variable] = simplex_array[index, end]
-			end
-		end
-	else
-		for (index, variable) in enumerate(solution_set)
-			if split(variable, "_")[1] == "e"
-				variables["x_$(split(variable, "_")[2])"] = simplex_array[end, index]
-			end
-		end
-	end
-	return variables
+function detect_solution(simplex_array::Matrix{Float64}, solution_set::Vector{String}; primal=true)
+    variables = Dict()
+    if primal
+        for (index, variable) in enumerate(solution_set)
+            if split(variable, "_")[1] == "x"
+                variables[variable] = simplex_array[index, end]
+            end
+        end
+    else
+        for (index, variable) in enumerate(solution_set)
+            if split(variable, "_")[1] == "e"
+                variables["x_$(split(variable, "_")[2])"] = simplex_array[end, index]
+            end
+        end
+    end
+    return variables
 end
 
 """
@@ -35,7 +35,7 @@ qui a le plus petit coefficient négatif.
 - `x::Matrix{Float64}`: Matrice du tableau de simplex
 """
 function incoming(x::Matrix{Float64})::Int64
-	return findmin(x[end, 1:end-1])[2]
+    return findmin(x[end, 1:end-1])[2]
 end
 
 
@@ -47,9 +47,9 @@ Permet de trouver la variable sortante de la base en utilisant la règle de Blan
 - `pivot::Int64`: Indice de la variable entrante
 """
 function outgoing(x::Matrix{Float64}, pivot::Int64)::Int64
-	x_div_pivot = x[1:end-1, end] ./ x[1:end-1, pivot]
-	x_div_pivot_positif = ifelse.(x_div_pivot .>= 0, x_div_pivot, Inf)
-	return findmin(x_div_pivot_positif)[2]
+    x_div_pivot = x[1:end-1, end] ./ x[1:end-1, pivot]
+    x_div_pivot_positif = ifelse.(x_div_pivot .>= 0, x_div_pivot, Inf)
+    return findmin(x_div_pivot_positif)[2]
 end
 
 """
@@ -62,35 +62,35 @@ Effectue les opérations de pivot de l'algorithme du simplex sur la matrice A.
 - `verbose::Bool`: Précise si l'on souhaite afficher les étapes de l'algorithme du simplex.
 - `primal::Bool`: Précise si l'on souhaite afficher la solution du problème primal.
 """
-function simplex(A::Matrix{Float64}; in_base = Nothing, all_base = Nothing, verbose::Bool = false, primal = true)
-	all_iteration, iter_rank = Dict(), 1
-	n::Int64, m::Int64 = size(A)[1] - 1, size(A)[2] - 1
-	if in_base == Nothing
-		in_base = ["e_$(i)" for i in 1:n]
-	end
-	if all_base == Nothing
-		out_base::Vector{String} = ["x_$(i)" for i in 1:m-n]
-		all_base = vcat(out_base, in_base)
-	end
-	B::Matrix{Float64} = deepcopy(A)
+function simplex(A::Matrix{Float64}; in_base=Nothing, all_base=Nothing, verbose::Bool=false, primal=true)
+    all_iteration, iter_rank = Dict(), 1
+    n::Int64, m::Int64 = size(A)[1] - 1, size(A)[2] - 1
+    if in_base == Nothing
+        in_base = ["e_$(i)" for i in 1:n]
+    end
+    if all_base == Nothing
+        out_base::Vector{String} = ["x_$(i)" for i in 1:m-n]
+        all_base = vcat(out_base, in_base)
+    end
+    B::Matrix{Float64} = deepcopy(A)
 
-	while any(i -> i < 0, B[end, 1:end-1])
-		all_iteration[iter_rank] = Dict("in_base" => deepcopy(in_base), "Simplex array" => deepcopy(B))
-		verbose && @show in_base
-		verbose && display(B)
-		k = incoming(B)
-		p = outgoing(B, k)
-		in_base[p] = all_base[k]
+    while any(i -> i < 0, B[end, 1:end-1])
+        all_iteration[iter_rank] = Dict("in_base" => deepcopy(in_base), "Simplex array" => deepcopy(B))
+        verbose && @show in_base
+        verbose && display(B)
+        k = incoming(B)
+        p = outgoing(B, k)
+        in_base[p] = all_base[k]
 
-		not_outgoing = setdiff(1:size(B)[1], [p])
-		B[p, :] = B[p, :] ./ B[p, k]
-		B[not_outgoing, :] = B[not_outgoing, :] - B[not_outgoing, k] * B[p, :]'
-		iter_rank += 1
-	end
-	verbose && println("Final solution")
-	verbose && @show in_base
-	verbose && display(B)
-	return B, detect_solution(B, primal ? in_base : all_base, primal = primal), in_base, all_base, all_iteration
+        not_outgoing = setdiff(1:size(B)[1], [p])
+        B[p, :] = B[p, :] ./ B[p, k]
+        B[not_outgoing, :] = B[not_outgoing, :] - B[not_outgoing, k] * B[p, :]'
+        iter_rank += 1
+    end
+    verbose && println("Final solution")
+    verbose && @show in_base
+    verbose && display(B)
+    return B, detect_solution(B, primal ? in_base : all_base, primal=primal), in_base, all_base, all_iteration
 end
 
 
@@ -106,57 +106,66 @@ Permet de détecter quelle algorithme du simplex appliquer en fonction du systè
 - `type::String`: Type de problème à résoudre soit une maximisation ou une minimisation
 """
 function simplex_case(A, b, c;
-	inequality = ["<=" for i in 1:size(A)[1]], type = "max_base", verbose = false)
-	A = convert(Matrix{Float64}, A)
-	b = convert(Vector{Float64}, b)
-	c = convert(Vector{Float64}, c)
-	@match type begin
-		"max_base" => begin
-			simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, -c)
-			return simplex(simp_array; in_base = in_base_variable, all_base = all_variable, verbose = verbose)
-		end
-		"min_base" => begin
-			simp_array, all_variable, in_base_variable = simplex_matrix_builder(convert(Matrix{Float64}, A'), c[1:end-1], [-b; 0])
-			return simplex(simp_array; in_base = in_base_variable, all_base = all_variable, verbose = verbose, primal = false)
-		end
-		"max_mixed" => begin
-			# First Phase
-			first_simp_array, first_all_variable, first_in_base_variable = simplex_matrix_builder(A, b, -c; inequality = inequality)
-			first_simp_array_with_artificial_function = function_by_artificial(first_simp_array, first_in_base_variable, first_all_variable)
-			first_simp_array, first_answer, first_in_base_variable = simplex(first_simp_array_with_artificial_function; in_base = first_in_base_variable,
-				all_base = first_all_variable, verbose = verbose)
-			# if first_answer[end, end] != 0
-			#     println("Le problème n'a pas de solution")
-			#     return
-			# end
-			# Second Phase
-			second_simp_array, second_all_variable = remove_artificial_column(first_simp_array, first_all_variable)
-			c_evaluated = c |>
-						  x -> vcat(-x[1:end-1], zeros(size(second_simp_array)[1] - 2), x[end])
-			second_simp_array[end, :] = c_evaluated
-			return simplex(second_simp_array; in_base = first_in_base_variable, all_base = second_all_variable, verbose = verbose)
-		end
+    inequality=Nothing,
+    type="max_base",
+    verbose=false
+	)
+
+    A = convert(Matrix{Float64}, A)
+    b = convert(Vector{Float64}, b)
+    c = convert(Vector{Float64}, c)
+
+    if inequality == Nothing
+        inequality = ["<=" for i in 1:size(A)[1]]
+    end
+	
+    @match type begin
+        "max_base" => begin
+            simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, -c)
+            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose)
+        end
+        "min_base" => begin
+            simp_array, all_variable, in_base_variable = simplex_matrix_builder(convert(Matrix{Float64}, A'), c[1:end-1], [-b; 0])
+            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose, primal=false)
+        end
+        "max_mixed" => begin
+            # First Phase
+            first_simp_array, first_all_variable, first_in_base_variable = simplex_matrix_builder(A, b, c; inequality=inequality)
+            first_simp_array_with_artificial_function = function_by_artificial(first_simp_array, first_in_base_variable, first_all_variable)
+            first_simp_array, first_answer, first_in_base_variable = simplex(first_simp_array_with_artificial_function; in_base=first_in_base_variable,
+                all_base=first_all_variable, verbose=verbose)
+            # if first_answer[end, end] != 0
+            #     println("Le problème n'a pas de solution")
+            #     return
+            # end
+            # Second Phase
+            second_simp_array, second_all_variable = remove_artificial_column(first_simp_array, first_all_variable)
+            c_evaluated = c |>
+                          x -> vcat(-x[1:end-1], zeros(size(second_simp_array)[1] - 2), x[end])
+            second_simp_array[end, :] = c_evaluated
+            return simplex(second_simp_array; in_base=first_in_base_variable, all_base=second_all_variable, verbose=verbose)
+        end
         "min_max" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, c)
-            return simplex(simp_array; in_base = in_base_variable, all_base = all_variable, verbose = verbose)
+            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose)
         end
         "max_min" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(convert(Matrix{Float64}, A'), c[1:end-1], [b; 0])
-            return simplex(simp_array; in_base = in_base_variable, all_base = all_variable, verbose = verbose, primal = false)
+            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose, primal=false)
         end
-	end
+    end
 end
 
 function test()
-	A = Float64[        10 5
-		2 3
-		1 0
-		0 1]
-	b = Float64[200; 60; 12; 6]
-	c = Float64[2000; 1000; 0]
-	inequality = ["<=", "=", "<=", ">="]
-	println("***Start***")
-	answer = simplex_case(A, b, c; type = "max_mixed", inequality = inequality)
-	foreach(x -> display(x["Simplex array"]), values(answer[5]))
-	return 0
+    A = Float64[1 1
+        4 2
+        1 4
+        1 0]
+    b = Float64[150; 440; 480; 90]
+    c = Float64[1000; 2000; 0]
+    inequality = ["<=", "=", "<=", ">="]
+    println("***Start***")
+    answer = simplex_case(A, b, c; type="max_base", verbose=true)
+    println(answer[2])
+    return 0
 end
