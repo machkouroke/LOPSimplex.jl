@@ -1,4 +1,5 @@
 using LOPSimplex: simplex,
+    simplex_case,
     add_artificial_variable,
     add_slack_variable,
     add_artificial_variable,
