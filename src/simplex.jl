@@ -109,7 +109,7 @@ function simplex_case(A, b, c;
     inequality=Nothing,
     type="max_base",
     verbose=false
-	)
+)
 
     A = convert(Matrix{Float64}, A)
     b = convert(Vector{Float64}, b)
@@ -118,21 +118,22 @@ function simplex_case(A, b, c;
     if inequality == Nothing
         inequality = ["<=" for i in 1:size(A)[1]]
     end
-	
+
     @match type begin
         "max_base" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, -c)
-            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose)
+            final_array, solution, final_in_base, final_all_base, all_iteration = simplex(simp_array; in_base=in_base_variable,
+                all_base=all_variable, verbose=verbose)
         end
         "min_base" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(convert(Matrix{Float64}, A'), c[1:end-1], [-b; 0])
-            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose, primal=false)
+            final_array, solution, final_in_base, final_all_base, all_iteration = simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose, primal=false)
         end
         "max_mixed" => begin
             # First Phase
             first_simp_array, first_all_variable, first_in_base_variable = simplex_matrix_builder(A, b, c; inequality=inequality)
             first_simp_array_with_artificial_function = function_by_artificial(first_simp_array, first_in_base_variable, first_all_variable)
-            first_simp_array, first_answer, first_in_base_variable = simplex(first_simp_array_with_artificial_function; in_base=first_in_base_variable,
+            first_simp_array, first_answer, first_in_base_variable, all_iteration = simplex(first_simp_array_with_artificial_function; in_base=first_in_base_variable,
                 all_base=first_all_variable, verbose=verbose)
             # if first_answer[end, end] != 0
             #     println("Le problème n'a pas de solution")
@@ -143,17 +144,19 @@ function simplex_case(A, b, c;
             c_evaluated = c |>
                           x -> vcat(-x[1:end-1], zeros(size(second_simp_array)[1] - 2), x[end])
             second_simp_array[end, :] = c_evaluated
-            return simplex(second_simp_array; in_base=first_in_base_variable, all_base=second_all_variable, verbose=verbose)
+            final_array, solution, final_in_base, final_all_base, all_iteration = simplex(second_simp_array; in_base=first_in_base_variable, all_base=second_all_variable, verbose=verbose)
         end
         "min_max" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, c)
-            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose)
+            final_array, solution, final_in_base, final_all_base, all_iteration = simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose)
         end
         "max_min" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(convert(Matrix{Float64}, A'), c[1:end-1], [b; 0])
-            return simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose, primal=false)
+            final_array, solution, final_in_base, final_all_base, all_iteration = simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose, primal=false)
         end
     end
+    all_iteration = Dict(key => Dict("Simplex array" => round.(value["Simplex array"], digits=2), "in_base" => value["in_base"]) for (key, value) in all_iteration)
+    return round.(final_array; digits=2), solution, final_in_base, final_all_base, all_iteration
 end
 
 function test()
@@ -165,7 +168,9 @@ function test()
     c = Float64[1000; 2000; 0]
     inequality = ["<=", "=", "<=", ">="]
     println("***Start***")
-    answer = simplex_case(A, b, c; type="max_base", verbose=true)
-    println(answer[2])
-    return 0
+    answer = simplex_case(A, b, c; type="max_base")
+    foreach(display, [answer[end][key]["Simplex array"] for key in answer[end] |> keys |> collect |> sort])
+    return Nothing
 end
+
+test()
