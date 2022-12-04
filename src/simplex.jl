@@ -159,7 +159,7 @@ function simplex_case(A, b, c;
     return round.(final_array; digits=2), solution, final_in_base, final_all_base, all_iteration
 end
 
-function py_simplex(A, b, c,
+function simplex_py(A, b, c,
     inequality,
     type
     )
