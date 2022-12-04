@@ -167,11 +167,7 @@ function simplex_py(A, b, c,
     display(A)
     display(b)
     display(c)
-    # A = convert(Matrix{Float64}, A)
-    # b = convert(Vector{Float64}, b)
-    # c = convert(Vector{Float64}, c)
-    # inequality = convert(Vector{String}, inequality)
-    # type = convert(String, type)
+    display(inequality)
     # return simplex_case(A, b, c; inequality=inequality, type=type)
 end
 function test()
