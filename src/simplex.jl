@@ -161,12 +161,15 @@ function simplex_py(A, b, c,
     inequality,
     type
     )
-    A = convert(Matrix{Float64}, A)
-    b = convert(Vector{Float64}, b)
-    c = convert(Vector{Float64}, c)
-    inequality = convert(Vector{String}, inequality)
-    type = convert(String, type)
-    return simplex_case(A, b, c; inequality=inequality, type=type)
+    @show type
+    @show typeof(type)
+    @show string(type)
+    # A = convert(Matrix{Float64}, A)
+    # b = convert(Vector{Float64}, b)
+    # c = convert(Vector{Float64}, c)
+    # inequality = convert(Vector{String}, inequality)
+    # type = convert(String, type)
+    # return simplex_case(A, b, c; inequality=inequality, type=type)
 end
 function test()
     A = Float64[10 5
