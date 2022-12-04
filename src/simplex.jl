@@ -178,5 +178,3 @@ function test()
     @show answer[2]
     return Nothing
 end
-
-test()
