@@ -159,17 +159,24 @@ function simplex_case(A, b, c;
     return round.(final_array; digits=2), solution, final_in_base, final_all_base, all_iteration
 end
 
+function py_simplex(A, b, c,
+    inequality,
+    type
+    )
+    return simplex_case(A, b, c; inequality=inequality, type=type)
+end
 function test()
-    A = Float64[1 1
-        4 2
-        1 4
-        1 0]
-    b = Float64[150; 440; 480; 90]
-    c = Float64[1000; 2000; 0]
+    A = Float64[10 5
+        2 3
+        1 0
+        0 1]
+    b = Float64[200; 60; 12; 6]
+    c = Float64[2000; 1000; 0]
     inequality = ["<=", "=", "<=", ">="]
     println("***Start***")
-    answer = simplex_case(A, b, c; type="max_base")
-    foreach(display, [answer[end][key]["Simplex array"] for key in answer[end] |> keys |> collect |> sort])
+    answer = simplex_case(A, b, c; type="max_mixed", inequality=inequality)
+    # foreach(display, [answer[end][key]["Simplex array"] for key in answer[end] |> keys |> collect |> sort])
+    @show answer[2]
     return Nothing
 end
 
