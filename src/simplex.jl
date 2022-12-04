@@ -161,7 +161,7 @@ function simplex_py(A, b, c,
     inequality,
     type
     )
-    inequality = convert(Vector, inequality)
+    inequality = convert(Vector{String}, inequality)
     @show inequality
     # return simplex_case(A, b, c; inequality=inequality, type=type)
 end
