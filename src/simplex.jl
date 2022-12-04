@@ -111,9 +111,7 @@ function simplex_case(A, b, c;
     verbose=false
 )
 
-    A = convert(Matrix{Float64}, A)
-    b = convert(Vector{Float64}, b)
-    c = convert(Vector{Float64}, c)
+   
 
     if inequality == Nothing
         inequality = ["<=" for i in 1:size(A)[1]]
@@ -163,6 +161,11 @@ function simplex_py(A, b, c,
     inequality,
     type
     )
+    A = convert(Matrix{Float64}, A)
+    b = convert(Vector{Float64}, b)
+    c = convert(Vector{Float64}, c)
+    inequality = convert(Vector{String}, inequality)
+    type = convert(String, type)
     return simplex_case(A, b, c; inequality=inequality, type=type)
 end
 function test()

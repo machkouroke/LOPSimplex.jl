@@ -1,7 +1,7 @@
 name = "LOPSimplex"
 uuid = "c8c3e34f-4835-45dd-878b-201efac5a6be"
 authors = ["machkouroke"]
-version = "0.1.3"
+version = "0.1.4"
 
 [deps]
 Match = "7eb4fadd-790c-5f42-8a69-bfa0b872bfbf"
