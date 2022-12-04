@@ -162,8 +162,7 @@ function simplex_py(A, b, c,
     type
     )
     inequality = [string(x) for x in convert(Vector, inequality)]
-    @show inequality
-    # return simplex_case(A, b, c; inequality=inequality, type=type)
+    return simplex_case(A, b, c; inequality=inequality, type=type)
 end
 function test()
     A = Float64[10 5
