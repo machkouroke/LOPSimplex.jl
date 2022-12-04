@@ -161,13 +161,7 @@ function simplex_py(A, b, c,
     inequality,
     type
     )
-    @show type
-    @show typeof(type)
-    @show string(type)
-    display(A)
-    display(b)
-    display(c)
-    display(inequality)
+    convert(Vector, inequality)
     # return simplex_case(A, b, c; inequality=inequality, type=type)
 end
 function test()
