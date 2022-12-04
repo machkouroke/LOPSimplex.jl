@@ -164,6 +164,9 @@ function simplex_py(A, b, c,
     @show type
     @show typeof(type)
     @show string(type)
+    display(A)
+    display(b)
+    display(c)
     # A = convert(Matrix{Float64}, A)
     # b = convert(Vector{Float64}, b)
     # c = convert(Vector{Float64}, c)
