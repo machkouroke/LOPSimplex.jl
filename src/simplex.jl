@@ -129,6 +129,7 @@ function simplex_case(A, b, c;
         end
         "max_mixed" => begin
             # First Phase
+            println("***Phase 1***")
             first_simp_array, first_all_variable, first_in_base_variable = simplex_matrix_builder(A, b, c; inequality=inequality)
             first_simp_array_with_artificial_function = function_by_artificial(first_simp_array, first_in_base_variable, first_all_variable)
             first_simp_array, first_answer, first_in_base_variable, all_iteration = simplex(first_simp_array_with_artificial_function; in_base=first_in_base_variable,
@@ -138,10 +139,10 @@ function simplex_case(A, b, c;
             #     return
             # end
             # Second Phase
+            println("***Phase 2***")
             second_simp_array, second_all_variable = remove_artificial_column(first_simp_array, first_all_variable)
-            c_evaluated = c |>
-                          x -> vcat(-x[1:end-1], zeros(size(second_simp_array)[1] - 2), x[end])
-            second_simp_array[end, :] = c_evaluated
+            second_simp_array[end, 1:size(c)[1] - 1] = -c[1:end-1]
+            second_simp_array[end, end] = c[end]
             final_array, solution, final_in_base, final_all_base, all_iteration = simplex(second_simp_array; in_base=first_in_base_variable, all_base=second_all_variable, verbose=verbose)
         end
         "min_max" => begin
@@ -165,16 +166,16 @@ function simplex_py(A, b, c,
     return simplex_case(A, b, c; inequality=inequality, type=type)
 end
 function test()
-    A = Float64[10 5
+    A = Float64[3.5 4
         2 3
-        1 0
-        0 1]
-    b = Float64[200; 60; 12; 6]
-    c = Float64[2000; 1000; 0]
-    inequality = ["<=", "=", "<=", ">="]
+        1 0]
+    b = Float64[1500; 2000; 120]
+    c = Float64[22410; 33230; 0]
+    inequality = ["<=", "<=", ">="]
     println("***Start***")
-    answer = simplex_case(A, b, c; type="max_mixed", inequality=inequality)
+    answer = simplex_case(A, b, c; type="max_mixed", inequality=inequality, verbose=true)
     # foreach(display, [answer[end][key]["Simplex array"] for key in answer[end] |> keys |> collect |> sort])
     @show answer[2]
     return Nothing
 end
+
