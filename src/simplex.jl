@@ -145,6 +145,24 @@ function simplex_case(A, b, c;
             second_simp_array[end, end] = c[end]
             final_array, solution, final_in_base, final_all_base, all_iteration = simplex(second_simp_array; in_base=first_in_base_variable, all_base=second_all_variable, verbose=verbose)
         end
+        "min_mixed" => begin
+            # First Phase
+            println("***Phase 1***")
+            first_simp_array, first_all_variable, first_in_base_variable = simplex_matrix_builder(A, b, -c; inequality=inequality)
+            first_simp_array_with_artificial_function = function_by_artificial(first_simp_array, first_in_base_variable, first_all_variable)
+            first_simp_array, first_answer, first_in_base_variable, all_iteration = simplex(first_simp_array_with_artificial_function; in_base=first_in_base_variable,
+                all_base=first_all_variable, verbose=verbose)
+            # if first_answer[end, end] != 0
+            #     println("Le problème n'a pas de solution")
+            #     return
+            # end
+            # Second Phase
+            println("***Phase 2***")
+            second_simp_array, second_all_variable = remove_artificial_column(first_simp_array, first_all_variable)
+            second_simp_array[end, 1:size(c)[1] - 1] = -c[1:end-1]
+            second_simp_array[end, end] = c[end]
+            final_array, solution, final_in_base, final_all_base, all_iteration = simplex(second_simp_array; in_base=first_in_base_variable, all_base=second_all_variable, verbose=verbose)
+        end
         "min_max" => begin
             simp_array, all_variable, in_base_variable = simplex_matrix_builder(A, b, c)
             final_array, solution, final_in_base, final_all_base, all_iteration = simplex(simp_array; in_base=in_base_variable, all_base=all_variable, verbose=verbose)
@@ -158,6 +176,19 @@ function simplex_case(A, b, c;
     return round.(final_array; digits=2), solution, final_in_base, final_all_base, all_iteration
 end
 
+"""
+	simplex_py(A, b, c,
+    inequality,
+    type
+    )
+Wrapper pour l'interfacage avec python
+# Arguments:
+- `A::Matrix{Float64}`: Matrice des coefficients du système de contraintes
+- `b::Vector{Float64}`: Vecteur des valeurs des contraintes
+- `c::Vector{Float64}`: Vecteur des coefficients de la fonction objectif
+- `inequality::Vector{String}`: Vecteur des inégalités du système de contraintes
+- `type::String`: Type de problème à résoudre soit une maximisation ou une minimisation
+"""
 function simplex_py(A, b, c,
     inequality,
     type
@@ -165,15 +196,17 @@ function simplex_py(A, b, c,
     inequality = [string(x) for x in convert(Vector, inequality)]
     return simplex_case(A, b, c; inequality=inequality, type=type)
 end
+
+
 function test()
-    A = Float64[3.5 4
-        2 3
-        1 0]
-    b = Float64[1500; 2000; 120]
-    c = Float64[22410; 33230; 0]
+    A = Float64[1 -1
+        1 -2
+        4 -1]
+    b = Float64[4; 5; 2]
+    c = Float64[4; 3; 0]
     inequality = ["<=", "<=", ">="]
     println("***Start***")
-    answer = simplex_case(A, b, c; type="max_mixed", inequality=inequality, verbose=true)
+    answer = simplex_case(A, b, c; type="max_base", inequality=inequality, verbose=true)
     # foreach(display, [answer[end][key]["Simplex array"] for key in answer[end] |> keys |> collect |> sort])
     @show answer[2]
     return Nothing

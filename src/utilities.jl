@@ -1,4 +1,12 @@
 using Match
+
+"""
+    add_slack_variable(A::Matrix{Float64}; inequality=["<=" for i in 1:size(A)[1]])
+Ajout les variables d'écart à la matrix `A` du programme
+# Arguments:
+- `A::Matrix{Float64}`: Matrice A du problème
+- `inequality`: Vecteur des inégalités du système de contraintes
+"""
 function add_slack_variable(A::Matrix{Float64}; inequality=["<=" for i in 1:size(A)[1]])
     n::Int64, m::Int64 = size(A)[1], size(A)[2]
     slack_variable::Matrix{Float64} = zeros(n, n)
@@ -12,6 +20,14 @@ function add_slack_variable(A::Matrix{Float64}; inequality=["<=" for i in 1:size
     return hcat(A, slack_variable)
 end
 
+
+"""
+    add_artificial_variable(A::Matrix{Float64}; inequality=["<=" for i in 1:size(A)[1]])
+Ajout les variables artificielle à la matrix `A` du programme
+# Arguments:
+- `A::Matrix{Float64}`: Matrice A du problème
+- `inequality`: Vecteur des inégalités du système de contraintes
+"""
 function add_artificial_variable(A::Matrix{Float64}; inequality=["<=" for i in 1:size(A)[1]])
     n::Int64, m::Int64 = size(A)[1], size(A)[2]
     slack_variable::Matrix{Float64} = zeros(n, n)
@@ -22,6 +38,12 @@ function add_artificial_variable(A::Matrix{Float64}; inequality=["<=" for i in 1
 end
 
 
+"""
+    variable_name_builder(A::Matrix{Float64})
+Crée les noms de toutes les variables du système
+# Arguments:
+- `A::Matrix{Float64}`: Matrice A du problème
+"""
 function variable_name_builder(A::Matrix{Float64})
     variable_name::Vector{String} = ["x_$i" for i in 1:size(A)[2]]
     slack_variable_name::Vector{String} = ["e_$i" for i in 1:size(A)[1]]
@@ -29,7 +51,14 @@ function variable_name_builder(A::Matrix{Float64})
     return [variable_name; slack_variable_name; artificial_variable]
 end
 
-function in_base_finder(inequality)
+
+"""
+    in_base_finder(inequality)::Vector{String}
+Renvoie les noms des variable de base de départ du système
+# Arguments:
+- `A::Matrix{Float64}`: Inéquation du système de contraintes
+"""
+function in_base_finder(inequality)::Vector{String}
     in_base::Vector{String} = []
     for (index, inequality) in enumerate(inequality)
         variable = @match inequality begin
@@ -42,6 +71,16 @@ function in_base_finder(inequality)
     return in_base
 end
 
+
+"""
+    simplex_matrix_builder(A::Matrix{Float64}, b::Vector{Float64}, c::Vector{Float64}; inequality=["<=" for i in 1:size(A)[1]])
+Construit le tableau initial du simplex
+# Arguments:
+- `A::Matrix{Float64}`: Inéquation du système de contraintes
+- `b::Vector{Float64}`: Vecteur des valeurs des contraintes
+- `c::Vector{Float64}`: Vecteur des coefficients de la fonction objectif
+- `inequality`: Vecteur des inégalités du système de contraintes
+"""
 function simplex_matrix_builder(A::Matrix{Float64}, b::Vector{Float64}, c::Vector{Float64}; inequality=["<=" for i in 1:size(A)[1]])
     n::Int64, m::Int64 = size(A)[1], size(A)[2]
     variable_name = variable_name_builder(A)
@@ -79,6 +118,7 @@ function function_by_artificial(A::Matrix{Float64}, in_base, all_variable)
     A_copy[end, in_base_indice] .= 0
     return A_copy
 end
+
 
 
 
